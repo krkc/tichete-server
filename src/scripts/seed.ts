@@ -8,6 +8,10 @@ const seederArgsInterface: commandLineArgs.OptionDefinition[] = [
   { name: 'prod', alias: 'p', type: Boolean },
 ];
 
+/**
+ * This script, run from package.json, starts a standalone nest application
+ * which handles seeding the database.
+ */
 async function bootstrap() {
   let appContext: INestApplicationContext;
   try {
