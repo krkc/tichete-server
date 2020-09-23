@@ -1,7 +1,10 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Role } from '../roles/role.entity';
+import { RolesService } from '../roles/roles.service';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserDto } from './dto/user.dto';
 import { User } from './user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -12,15 +15,20 @@ describe('UsersController', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-        controllers: [UsersController],
-        providers: [
-          UsersService,
-          {
-            provide: getRepositoryToken(User),
-            useClass: Repository,
-          }
-        ],
-      }).compile();
+      controllers: [UsersController],
+      providers: [
+        UsersService,
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        RolesService,
+        {
+          provide: getRepositoryToken(Role),
+          useClass: Repository,
+        },
+      ],
+    }).compile();
 
     usersService = moduleRef.get<UsersService>(UsersService);
     usersController = moduleRef.get<UsersController>(UsersController);
@@ -63,8 +71,8 @@ describe('UsersController', () => {
   describe('update', () => {
     it('should update a user', async () => {
       const id = "1";
-      const userDto = {email: 'admin@site.com', password: 'password'} as Partial<CreateUserDto>;
-      const user = { ...userDto, id: +id } as Partial<User>;
+      const updateUserDto = {email: 'admin@site.com', password: 'password'} as Partial<CreateUserDto>;
+      const user = { ...updateUserDto, id: +id } as Partial<User>;
       const users = [user as Partial<User>];
 
       jest.spyOn(usersService, 'update').mockImplementation(async (_id: string, createUserDto: CreateUserDto) => {
@@ -74,10 +82,10 @@ describe('UsersController', () => {
         return {...createUserDto, id: currentUser.id} as User;
       });
 
-      user.password = userDto.password = 'newPassword';
-      expect(await usersController.update(id, userDto as CreateUserDto)).toEqual(user);
+      user.password = updateUserDto.password = 'newPassword';
+      expect(await usersController.update(id, updateUserDto as UserDto)).toEqual(user);
       users.pop();
-      await expect(usersController.update(id, userDto as CreateUserDto)).rejects.toThrow();
+      await expect(usersController.update(id, updateUserDto as UserDto)).rejects.toThrow();
     });
   });
 
@@ -91,7 +99,7 @@ describe('UsersController', () => {
         users = users.filter(u => u.id !== +id);
         return null;
       });
-      
+
       expect(await usersController.remove(user.id.toString())).toBeNull();
       await expect(usersController.remove(user.id.toString())).rejects.toThrow();
     });

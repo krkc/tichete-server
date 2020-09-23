@@ -18,7 +18,6 @@ async function bootstrap() {
 
   const logger = appContext.get(Logger);
   const seeder = appContext.get(Seeder);
-
   try {
     await seeder.run(commandLineArgs(seederArgsInterface) as CommandLineArgsOptions);
     logger.debug('Seeding complete!');
@@ -26,7 +25,7 @@ async function bootstrap() {
     logger.error('Seeding failed!');
     throw error;
   } finally {
-    appContext.close()
+    appContext.close();
   }
 }
 bootstrap();

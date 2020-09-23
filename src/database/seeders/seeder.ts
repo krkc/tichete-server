@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { User } from '../../../src/users/user.entity';
 import * as argon2 from 'argon2';
-import { Role } from '../../../src/roles/role.entity';
 import { RolesService } from '../../../src/roles/roles.service';
 import { UsersService } from '../../../src/users/users.service';
 import commandLineArgs from 'command-line-args';
+import { CreateRoleDto } from '../../roles/dto/create-role.dto';
+import { CreateUserDto } from '../../users/dto/create-user.dto';
+import { ResourceNotFoundError } from '../../resource-not-found.error';
 
 export interface CommandLineArgsOptions extends commandLineArgs.CommandLineOptions {
   truncate: boolean;
@@ -20,43 +21,58 @@ export class Seeder {
   ) { }
   public async run(args: CommandLineArgsOptions) {
     if (args.prod) {
-      await this.seedProd();
+      return await this.seedProd();
     }
     return;
   }
 
   private async seedProd() {
     try {
-      await this.adminUser();  
+      await this.adminUser();
     } catch (error) {
       this.logger.error('Failed seeding users...');
       throw error;
     }
-    
-    this.logger.debug('Successfuly completed seeding users...');
+
+    this.logger.debug('Production Seeding complete.');
   }
 
   private async adminUser() {
-    const createdRole = await this.adminRole();
+    const adminRole = await this.adminRole();
 
-    const adminUser = new User();
-    adminUser.email = 'admin@site.com';
-    adminUser.password = await argon2.hash('password');
-    adminUser.firstName = 'Site';
-    adminUser.lastName = 'Admin';
-    adminUser.role = createdRole;
+    try {
+      const adminUser = await this.usersService.findOne('1');
+      this.logger.debug('Admin user already exists, skipping.');
+      return adminUser;
+    } catch (error) {
+      if (error.name !== ResourceNotFoundError.name) throw error;
+    }
 
-    const newUser = await this.usersService.create(adminUser);
+    const createAdminUser = new CreateUserDto();
+    createAdminUser.email = 'admin@site.com';
+    createAdminUser.password = await argon2.hash('password');
+    createAdminUser.firstName = 'Site';
+    createAdminUser.lastName = 'Admin';
+
+    const newUser = await this.usersService.create(createAdminUser);
+    await this.usersService.assignRole(newUser.id, adminRole.id);
+    await new Promise(resolve => setTimeout(resolve, 500)); // https://github.com/nestjs/typeorm/issues/646
     this.logger.debug('Admin user created.');
-
-    return newUser;
   }
 
   private async adminRole() {
-    const adminRole = new Role();
-    adminRole.name = 'Administrator';
+    try {
+      const adminRole = await this.rolesService.findOne('1');
+      this.logger.debug('Admin role already exists, skipping.');
+      return adminRole;
+    } catch (error) {
+      if (error.name !== ResourceNotFoundError.name) throw error;
+    }
 
-    const createdRole = await this.rolesService.create(adminRole)
+    const createAdminRole = new CreateRoleDto();
+    createAdminRole.name = 'Administrator';
+
+    const createdRole = await this.rolesService.create(createAdminRole);
     this.logger.debug('Admin role created.'); // or .verbose()
 
     return createdRole;

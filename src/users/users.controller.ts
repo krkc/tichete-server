@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserDto } from './dto/user.dto';
 import { UsersService } from './users.service';
 
 @ApiBearerAuth()
@@ -14,7 +15,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
   })
-  async getAll() {
+  getAll() {
     return this.usersService.findAll();
   }
 
@@ -23,7 +24,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
   })
-  async getOne(@Param('id') id: string) {
+  getOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
@@ -32,7 +33,7 @@ export class UsersController {
   @ApiResponse({
     status: 201,
   })
-  async create(@Body() createUserDto: CreateUserDto) {
+  create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
@@ -41,8 +42,8 @@ export class UsersController {
   @ApiResponse({
     status: 200,
   })
-  async update(@Param('id') id: string, @Body() createUserDto: CreateUserDto) {
-    return this.usersService.update(id, createUserDto);
+  update(@Param('id') id: string, @Body() updateUserDto: UserDto) {
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')

@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateRoleDto } from './dto/create-role.dto';
+import { RoleDto } from './dto/role.dto';
 import { RolesService } from './roles.service';
 
 @ApiBearerAuth()
@@ -29,8 +30,8 @@ export class RolesController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a role' })
-  async update(@Param('id') id: string, @Body() createRoleDto: CreateRoleDto) {
-    return this.rolesService.update(id, createRoleDto);
+  async update(@Param('id') id: string, @Body() updateRoleDto: RoleDto) {
+    return this.rolesService.update(id, updateRoleDto);
   }
 
   @Delete(':id')
