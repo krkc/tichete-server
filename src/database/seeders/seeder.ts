@@ -1,11 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { RolesService } from '../../../src/roles/roles.service';
 import { UsersService } from '../../../src/users/users.service';
 import commandLineArgs from 'command-line-args';
 import { CreateRoleDto } from '../../roles/dto/create-role.dto';
 import { CreateUserDto } from '../../users/dto/create-user.dto';
-import { ResourceNotFoundError } from '../../resource-not-found.error';
 
 export interface CommandLineArgsOptions extends commandLineArgs.CommandLineOptions {
   truncate: boolean;
@@ -45,7 +44,7 @@ export class Seeder {
       this.logger.debug('Admin user already exists, skipping.');
       return adminUser;
     } catch (error) {
-      if (error.name !== ResourceNotFoundError.name) throw error;
+      if (error.name !== NotFoundException.name) throw error;
     }
 
     const createAdminUser = new CreateUserDto();
@@ -66,7 +65,7 @@ export class Seeder {
       this.logger.debug('Admin role already exists, skipping.');
       return adminRole;
     } catch (error) {
-      if (error.name !== ResourceNotFoundError.name) throw error;
+      if (error.name !== NotFoundException.name) throw error;
     }
 
     const createAdminRole = new CreateRoleDto();

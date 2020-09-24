@@ -6,16 +6,15 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 import { User } from './user.entity';
-import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { ImATeapotException, NotFoundException } from '@nestjs/common';
 
-describe('UsersController', () => {
-  let usersController: UsersController;
+describe('UsersService', () => {
   let usersService: UsersService;
+  let userRepository: Repository<User>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      controllers: [UsersController],
       providers: [
         UsersService,
         {
@@ -30,26 +29,39 @@ describe('UsersController', () => {
       ],
     }).compile();
 
+    userRepository = moduleRef.get<Repository<User>>(getRepositoryToken(User));
     usersService = moduleRef.get<UsersService>(UsersService);
-    usersController = moduleRef.get<UsersController>(UsersController);
   });
 
   describe('findAll', () => {
+    it('should return an empty array', async () => {
+      const users: User[] = [];
+      jest.spyOn(userRepository, 'find').mockImplementation(async () => users);
+
+      expect(await usersService.findAll()).toEqual(users as UserDto[]);
+    });
+
     it('should return an array of users', async () => {
       const users = [ new User() ];
-      jest.spyOn(usersService, 'findAll').mockImplementation(async () => users);
+      jest.spyOn(userRepository, 'find').mockImplementation(async () => users);
 
-      expect(await usersController.getAll()).toBe(users);
+      expect(await usersService.findAll()).toEqual(users as UserDto[]);
     });
   });
 
   describe('findOne', () => {
-    it('should return a user', async () => {
+    it('when user doesn\'t exist, should throw a Not Found exception', async () => {
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => null);
+
+      await expect(usersService.findOne('1')).rejects.toThrowError(NotFoundException);
+    });
+
+    it('when user exists, should return the user dto', async () => {
       const user = new User();
       user.id = 1;
-      jest.spyOn(usersService, 'findOne').mockImplementation(async (id: string) => [user].find(u => u.id === +id));
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async (id) => [user].find(u => u.id === +id));
 
-      expect(await usersController.getOne('1')).toBe(user);
+      expect(await usersService.findOne('1')).toEqual(usersService.convertToDto(user));
     });
   });
 
@@ -57,51 +69,67 @@ describe('UsersController', () => {
     it('should return a user', async () => {
       const email = "admin@site.com";
       const password = "password";
-      const userDto = {email, password} as Partial<CreateUserDto>;
+      const userDto = {email, password} as CreateUserDto;
 
-      jest.spyOn(usersService, 'create').mockImplementation(async (createUserDto: CreateUserDto) => {
-        return {id: 1, email: createUserDto.email, password: createUserDto.password} as Partial<User> as User;
+      jest.spyOn(userRepository, 'create').mockImplementation((createUserDto) => {
+        return {email: createUserDto.email, password: createUserDto.password} as User;
       });
 
-      const user = {id: 1, email, password} as Partial<User>;
-      expect(await usersController.create(userDto as CreateUserDto)).toEqual(user);
+      jest.spyOn(userRepository, 'save').mockImplementation(async (createUserDto) => {
+        return {id: 1, email: createUserDto.email, password: createUserDto.password} as User;
+      });
+
+      const user = {id: 1, email, password} as User;
+      expect(await usersService.create(userDto)).toEqual(usersService.convertToDto(user));
     });
   });
 
   describe('update', () => {
-    it('should update a user', async () => {
+    it('should throw not found exception', async () => {
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => null);
+
+      await expect(usersService.update('1', {} as UserDto)).rejects.toThrowError(NotFoundException);
+    });
+
+    it('when using separate ids, should throw teapot exception', async () => {
+      const crazyId = '2';
+      const updateUserDto = {id: 1, email: 'admin@site.com', password: 'password'} as UserDto;
+
+      await expect(usersService.update(crazyId, updateUserDto)).rejects.toThrowError(ImATeapotException);
+    });
+
+    it('should return an updated user dto', async () => {
       const id = "1";
-      const updateUserDto = {email: 'admin@site.com', password: 'password'} as Partial<CreateUserDto>;
-      const user = { ...updateUserDto, id: +id } as Partial<User>;
-      const users = [user as Partial<User>];
+      const updateUserDto = {id: +id, email: 'admin@site.com', password: 'password'} as UserDto;
+      const newPassword = 'newPassword';
 
-      jest.spyOn(usersService, 'update').mockImplementation(async (_id: string, createUserDto: CreateUserDto) => {
-        const currentUser = users.find(u => u.id === +_id);
-        if (!currentUser) throw new Error();
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => updateUserDto as User);
 
-        return {...createUserDto, id: currentUser.id} as User;
+      jest.spyOn(userRepository, 'save').mockImplementation(async (_updateUserDto) => {
+        _updateUserDto.password = newPassword;
+        return _updateUserDto as User;
       });
 
-      user.password = updateUserDto.password = 'newPassword';
-      expect(await usersController.update(id, updateUserDto as UserDto)).toEqual(user);
-      users.pop();
-      await expect(usersController.update(id, updateUserDto as UserDto)).rejects.toThrow();
+      const updatedUser = usersService.convertToDto({ ...updateUserDto, password: newPassword, id: +id });
+      expect(await usersService.update(id, updateUserDto as UserDto)).toEqual(updatedUser);
     });
   });
 
   describe('delete', () => {
+    it('should throw not found exception', async () => {
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => null);
+
+      await expect(usersService.remove('1')).rejects.toThrowError(NotFoundException);
+    });
+
     it('should delete a user', async () => {
-      const user = {id: 1} as Partial<User>;
-      let users = [user];
-      jest.spyOn(usersService, 'remove').mockImplementation(async (id: string) => {
-        if (!users.includes(user)) throw new Error();
+      const user = {id: 1} as User;
 
-        users = users.filter(u => u.id !== +id);
-        return null;
-      });
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => user);
 
-      expect(await usersController.remove(user.id.toString())).toBeNull();
-      await expect(usersController.remove(user.id.toString())).rejects.toThrow();
+      jest.spyOn(userRepository, 'delete').mockImplementation(async () => null);
+
+      expect(await usersService.remove(user.id.toString())).toBeNull();
     });
   });
 });

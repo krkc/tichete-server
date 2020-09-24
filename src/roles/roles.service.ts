@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { ResourceNotFoundError } from '../resource-not-found.error';
 import { Repository } from 'typeorm';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RoleDto } from './dto/role.dto';
@@ -21,7 +20,7 @@ export class RolesService {
 
   async findOne(id: string): Promise<RoleDto> {
     const role = await this.rolesRepository.findOne(id);
-    if (!role) throw new ResourceNotFoundError();
+    if (!role) throw new NotFoundException();
 
     return role;
   }
@@ -32,14 +31,14 @@ export class RolesService {
 
   async update(id: string, roleDto: RoleDto): Promise<RoleDto> {
     const role = await this.rolesRepository.findOne(id);
-    if (!role) throw new ResourceNotFoundError();
+    if (!role) throw new NotFoundException();
 
     return this.rolesRepository.save({ ...roleDto, id: Number(id) });
   }
 
   async remove(id: string): Promise<void> {
     const role = await this.rolesRepository.findOne(id);
-    if (!role) throw new ResourceNotFoundError();
+    if (!role) throw new NotFoundException();
 
     await this.rolesRepository.delete(id);
   }

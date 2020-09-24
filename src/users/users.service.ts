@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ImATeapotException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { classToPlain, plainToClass } from 'class-transformer';
@@ -6,7 +6,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 import { User } from './user.entity';
 import { Role } from '../roles/role.entity';
-import { ResourceNotFoundError } from '../resource-not-found.error';
 import { RolesService } from '../roles/roles.service';
 
 @Injectable()
@@ -24,14 +23,14 @@ export class UsersService {
 
   async findOne(id: string): Promise<UserDto> {
     const user = await this.usersRepository.findOne(id);
-    if (!user) throw new ResourceNotFoundError();
+    if (!user) throw new NotFoundException();
 
     return this.convertToDto(user);
   }
 
   async findOneByEmail(email: string): Promise<UserDto> {
     const user = await this.usersRepository.findOne({ where: {email}});
-    if (!user) throw new ResourceNotFoundError();
+    if (!user) throw new NotFoundException();
 
     return this.convertToDto(user);
   }
@@ -42,15 +41,20 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UserDto): Promise<UserDto> {
+    if (updateUserDto.id && +id !== updateUserDto.id) throw new ImATeapotException('Why are you using two separate ids? Trying to brew coffee in a teapot again?');
+
+    if (!await this.usersRepository.findOne(id)) throw new NotFoundException();
+
     const user = await this.usersRepository.save({ ...updateUserDto, id: Number(id) });
     return this.convertToDto(user);
   }
 
   async remove(id: string): Promise<void> {
-    const user = await this.usersRepository.findOne(id);
-    if (!user) throw new ResourceNotFoundError();
+    if (!await this.usersRepository.findOne(id)) throw new NotFoundException();
 
     await this.usersRepository.delete(id);
+
+    return null;
   }
 
   async assignRole(userId: number, roleId?: number): Promise<void> {
