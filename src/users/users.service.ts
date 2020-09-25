@@ -2,6 +2,7 @@ import { ImATeapotException, Injectable, NotFoundException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { classToPlain, plainToClass } from 'class-transformer';
+import * as argon2 from 'argon2';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 import { User } from './user.entity';
@@ -62,6 +63,13 @@ export class UsersService {
     const user = await this.usersRepository.findOne(userId);
     user.role = role as Role;
     this.usersRepository.save(user);
+  }
+
+  async isPasswordCorrect(userId: number, plainPassword: string): Promise<boolean> {
+    const user = await this.usersRepository.findOne(userId);
+    if (!user) throw new NotFoundException();
+
+    return argon2.verify(user.password, plainPassword);
   }
 
   convertToDto(user: any): UserDto {

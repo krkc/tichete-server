@@ -120,7 +120,7 @@ describe('The AppController\'s Auth Routes', () => {
 
   describe('when logging in an authenticated user', () => {
     it('should contain an access token in the response data', async () => {
-      const token = await authController.login(new UserDto());
+      const token = await authController.login({ user: new UserDto() });
       expect(token).toEqual({access_token: ''});
     });
   });

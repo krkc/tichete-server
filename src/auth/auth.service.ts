@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as argon2 from 'argon2';
 import { UserDto } from '../users/dto/user.dto';
 import { UsersService } from '../users/users.service';
 
@@ -22,7 +21,7 @@ export class AuthService {
       return null;
     }
 
-    if (!await argon2.verify(user.password, pass)) return null;
+    if (!this.usersService.isPasswordCorrect(user.id, pass)) return null;
 
     return this.usersService.convertToDto(user);
   }

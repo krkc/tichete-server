@@ -1,4 +1,4 @@
-import { Body, Controller, Post, SetMetadata, UseGuards } from '@nestjs/common';
+import { Controller, Post, Request, SetMetadata, UseGuards } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -24,7 +24,7 @@ export class AuthController {
   @SetMetadata('override-rejection', true)
   @UseGuards(LocalAuthGuard)
   @ApiBody({ type: UserDto })
-  login(@Body() user: UserDto) {
-    return this.authService.getAuthToken(user);
+  login(@Request() req) {
+    return this.authService.getAuthToken(req.user);
   }
 }
