@@ -44,7 +44,7 @@ export class Seeder {
       this.logger.debug('Admin user already exists, skipping.');
       return adminUser;
     } catch (error) {
-      if (error.name !== NotFoundException.name) throw error;
+      if (!(error instanceof NotFoundException)) throw error;
     }
 
     const createAdminUser = new CreateUserDto();
@@ -65,7 +65,7 @@ export class Seeder {
       this.logger.debug('Admin role already exists, skipping.');
       return adminRole;
     } catch (error) {
-      if (error.name !== NotFoundException.name) throw error;
+      if (!(error instanceof NotFoundException)) throw error;
     }
 
     const createAdminRole = new CreateRoleDto();
