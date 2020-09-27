@@ -16,6 +16,7 @@ import { Role } from '../roles/role.entity';
 describe('The Authentication Service', () => {
   let authService: AuthService;
   let usersService: UsersService;
+  let userRepository: Repository<User>;
   let logger: LoggerService;
 
   const email = 'admin@site.com';
@@ -45,14 +46,7 @@ describe('The Authentication Service', () => {
 
     authService = moduleRef.get<AuthService>(AuthService);
     usersService = moduleRef.get<UsersService>(UsersService);
-
-    jest.spyOn(usersService, 'findOneByEmail').mockImplementation(async (_email) => {
-      if (users.length < 1) throw new Error();
-
-      const _user = users.find((u) => u.email === _email);
-      _user.password = await argon2.hash(_user.password);
-      return _user;
-    });
+    userRepository = moduleRef.get<Repository<User>>(getRepositoryToken(User));
 
     logger = jest.fn<LoggerService,[]>(() => ({
       error: jest.fn(),
@@ -63,15 +57,16 @@ describe('The Authentication Service', () => {
   });
 
   describe('when validating an authenticating user', () => {
-    it('should return the user without the password field', async () => {
-      users = [{email, password: pass} as User];
+    it('if user found and passwords match, should return the user without the password field', async () => {
+      users = [{email, password: await argon2.hash(pass)} as User];
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => ({ ...users[0], id: 1 } as User));
 
       const validatedUser = await authService.validateAndGetUser(email, pass);
-      expect(validatedUser).toEqual(usersService.convertToDto(users[0]));
+      expect(validatedUser).toEqual(usersService.convertToDto({ ...users[0], id: 1}));
     });
 
-    it('should log error and return null if user not found', async () => {
-      users = [];
+    it('if user not found, should log error and return null', async () => {
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => null);
 
       const user = await authService.validateAndGetUser(email, pass);
       expect(logger.error).toBeCalledTimes(1);

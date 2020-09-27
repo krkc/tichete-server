@@ -57,9 +57,8 @@ describe('UsersService', () => {
     });
 
     it('when user exists, should return the user dto', async () => {
-      const user = new User();
-      user.id = 1;
-      jest.spyOn(userRepository, 'findOne').mockImplementation(async (id) => [user].find(u => u.id === +id));
+      const user = {id: 1} as User;
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => user);
 
       expect(await usersService.findOne('1')).toEqual(usersService.convertToDto(user));
     });

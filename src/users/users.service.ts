@@ -30,7 +30,7 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string): Promise<UserDto> {
-    const user = await this.usersRepository.findOne({ where: {email}});
+    const user = await this.usersRepository.findOne({ email });
     if (!user) throw new NotFoundException();
 
     return this.convertToDto(user);
