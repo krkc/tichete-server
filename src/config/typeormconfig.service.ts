@@ -4,7 +4,7 @@ import * as path from 'path';
 
 dotenv.config();
 
-class ConfigService {
+class TypeOrmConfigService {
 
   constructor(private env: { [k: string]: string | undefined }) { }
 
@@ -55,7 +55,7 @@ class ConfigService {
 
 }
 
-const configService = new ConfigService(process.env)
+const configService = new TypeOrmConfigService(process.env)
   .ensureValues([
     'DB_HOST',
     'DB_PORT',
