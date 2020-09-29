@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { RolesService } from '../../../src/roles/roles.service';
+import { RolesService } from '../../../src/users/roles/roles.service';
 import { UsersService } from '../../../src/users/users.service';
 import commandLineArgs from 'command-line-args';
-import { CreateRoleDto } from '../../roles/dto/create-role.dto';
+import { CreateRoleDto } from '../../users/roles/dto/create-role.dto';
 import { CreateUserDto } from '../../users/dto/create-user.dto';
 
 export interface CommandLineArgsOptions extends commandLineArgs.CommandLineOptions {
