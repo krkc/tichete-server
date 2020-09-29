@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from '../roles/role.entity';
-import { RolesService } from '../roles/roles.service';
+import { Role } from './roles/role.entity';
+import { RolesService } from './roles/roles.service';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UsersService } from './users.service';

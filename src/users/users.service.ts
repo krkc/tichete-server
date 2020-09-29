@@ -6,10 +6,10 @@ import * as argon2 from 'argon2';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 import { User } from './user.entity';
-import { Role } from '../roles/role.entity';
-import { RolesService } from '../roles/roles.service';
+import { Role } from './roles/role.entity';
+import { RolesService } from './roles/roles.service';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
-import { RoleDto } from 'src/roles/dto/role.dto';
+import { RoleDto } from './roles/dto/role.dto';
 
 @Injectable()
 export class UsersService extends TypeOrmCrudService<User> {

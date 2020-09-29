@@ -1,14 +1,14 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from '../../roles/role.entity';
-import { RolesService } from '../../roles/roles.service';
+import { Role } from '../../users/roles/role.entity';
+import { RolesService } from '../../users/roles/roles.service';
 import { Repository } from 'typeorm';
 import { UserDto } from '../../users/dto/user.dto';
 import { User } from '../../users/user.entity';
 import { UsersService } from '../../users/users.service';
 import { Logger, LoggerService } from '@nestjs/common';
 import { CommandLineArgsOptions, Seeder } from './seeder';
-import { RoleDto } from '../../roles/dto/role.dto';
+import { RoleDto } from '../../users/roles/dto/role.dto';
 import { MockRepository } from '../../repository.mock';
 
 describe('Seeder', () => {

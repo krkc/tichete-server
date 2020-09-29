@@ -10,8 +10,8 @@ import { LoggerService } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserDto } from '../users/dto/user.dto';
-import { RolesService } from '../roles/roles.service';
-import { Role } from '../roles/role.entity';
+import { RolesService } from '../users/roles/roles.service';
+import { Role } from '../users/roles/role.entity';
 import { MockRepository } from '../repository.mock';
 
 describe('The Authentication Service', () => {
