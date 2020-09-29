@@ -9,6 +9,7 @@ import { UsersService } from '../../users/users.service';
 import { Logger, LoggerService } from '@nestjs/common';
 import { CommandLineArgsOptions, Seeder } from './seeder';
 import { RoleDto } from '../../roles/dto/role.dto';
+import { MockRepository } from '../../repository.mock';
 
 describe('Seeder', () => {
   let seeder: Seeder;
@@ -24,12 +25,12 @@ describe('Seeder', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
+          useClass: MockRepository,
         },
         RolesService,
         {
           provide: getRepositoryToken(Role),
-          useClass: Repository,
+          useClass: MockRepository,
         },
         Seeder,
         Logger

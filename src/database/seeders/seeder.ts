@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { RolesService } from '../../../src/roles/roles.service';
 import { UsersService } from '../../../src/users/users.service';
@@ -39,12 +39,10 @@ export class Seeder {
   private async adminUser() {
     const adminRole = await this.adminRole();
 
-    try {
-      const adminUser = await this.usersService.findOne('1');
+    const adminUser = await this.usersService.findOne('1');
+    if (adminUser) {
       this.logger.debug('Admin user already exists, skipping.');
       return adminUser;
-    } catch (error) {
-      if (!(error instanceof NotFoundException)) throw error;
     }
 
     const createAdminUser = new CreateUserDto();
@@ -60,12 +58,10 @@ export class Seeder {
   }
 
   private async adminRole() {
-    try {
-      const adminRole = await this.rolesService.findOne('1');
+    const adminRole = await this.rolesService.findOne('1');
+    if (adminRole) {
       this.logger.debug('Admin role already exists, skipping.');
       return adminRole;
-    } catch (error) {
-      if (!(error instanceof NotFoundException)) throw error;
     }
 
     const createAdminRole = new CreateRoleDto();

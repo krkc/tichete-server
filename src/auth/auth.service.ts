@@ -13,15 +13,10 @@ export class AuthService {
   ) {}
 
   async validateAndGetUser(email: string, pass: string): Promise<UserDto> {
-    let user: UserDto;
-    try {
-      user = await this.usersService.findOneByEmail(email);
-    } catch (error) {
-      this.logger.error(error);
+    const user = await this.usersService.findOne(email);
+    if (!user || !this.usersService.isPasswordCorrect(user.id, pass)) {
       return null;
     }
-
-    if (!this.usersService.isPasswordCorrect(user.id, pass)) return null;
 
     return this.usersService.convertToDto(user);
   }

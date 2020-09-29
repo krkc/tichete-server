@@ -12,6 +12,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserDto } from '../users/dto/user.dto';
 import { RolesService } from '../roles/roles.service';
 import { Role } from '../roles/role.entity';
+import { MockRepository } from '../repository.mock';
 
 describe('The Authentication Service', () => {
   let authService: AuthService;
@@ -30,12 +31,12 @@ describe('The Authentication Service', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
+          useClass: MockRepository,
         },
         RolesService,
         {
           provide: getRepositoryToken(Role),
-          useClass: Repository,
+          useClass: MockRepository,
         },
         {
           provide: JwtService,
@@ -65,11 +66,10 @@ describe('The Authentication Service', () => {
       expect(validatedUser).toEqual(usersService.convertToDto({ ...users[0], id: 1}));
     });
 
-    it('if user not found, should log error and return null', async () => {
+    it('if user not found, should return null', async () => {
       jest.spyOn(userRepository, 'findOne').mockImplementation(async () => null);
 
       const user = await authService.validateAndGetUser(email, pass);
-      expect(logger.error).toBeCalledTimes(1);
       expect(user).toBeNull();
     });
   });
@@ -95,12 +95,12 @@ describe('The AppController\'s Auth Routes', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
+          useClass: MockRepository,
         },
         RolesService,
         {
           provide: getRepositoryToken(Role),
-          useClass: Repository,
+          useClass: MockRepository,
         },
         {
           provide: JwtService,

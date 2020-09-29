@@ -3,15 +3,16 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Role } from '../roles/role.entity';
 import { RolesService } from '../roles/roles.service';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UserDto } from './dto/user.dto';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
-import { ImATeapotException, NotFoundException } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { MockRepository } from '../repository.mock';
+import { NotFoundException } from '@nestjs/common';
 
 describe('UsersService', () => {
   let usersService: UsersService;
-  let userRepository: Repository<User>;
+  let rolesRepository: Repository<Role>;
+  let usersRepository: Repository<User>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -19,49 +20,19 @@ describe('UsersService', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useClass: Repository,
+          useClass: MockRepository,
         },
         RolesService,
         {
           provide: getRepositoryToken(Role),
-          useClass: Repository,
+          useClass: MockRepository,
         },
       ],
     }).compile();
 
-    userRepository = moduleRef.get<Repository<User>>(getRepositoryToken(User));
+    usersRepository = moduleRef.get<Repository<User>>(getRepositoryToken(User));
+    rolesRepository = moduleRef.get<Repository<Role>>(getRepositoryToken(Role));
     usersService = moduleRef.get<UsersService>(UsersService);
-  });
-
-  describe('findAll', () => {
-    it('should return an empty array', async () => {
-      const users: User[] = [];
-      jest.spyOn(userRepository, 'find').mockImplementation(async () => users);
-
-      expect(await usersService.findAll()).toEqual(users as UserDto[]);
-    });
-
-    it('should return an array of users', async () => {
-      const users = [ new User() ];
-      jest.spyOn(userRepository, 'find').mockImplementation(async () => users);
-
-      expect(await usersService.findAll()).toEqual(users as UserDto[]);
-    });
-  });
-
-  describe('findOne', () => {
-    it('when user doesn\'t exist, should throw a Not Found exception', async () => {
-      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => null);
-
-      await expect(usersService.findOne('1')).rejects.toThrowError(NotFoundException);
-    });
-
-    it('when user exists, should return the user dto', async () => {
-      const user = {id: 1} as User;
-      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => user);
-
-      expect(await usersService.findOne('1')).toEqual(usersService.convertToDto(user));
-    });
   });
 
   describe('create', () => {
@@ -70,11 +41,11 @@ describe('UsersService', () => {
       const password = "password";
       const userDto = {email, password} as CreateUserDto;
 
-      jest.spyOn(userRepository, 'create').mockImplementation((createUserDto) => {
+      jest.spyOn(usersRepository, 'create').mockImplementation((createUserDto) => {
         return {email: createUserDto.email, password: createUserDto.password} as User;
       });
 
-      jest.spyOn(userRepository, 'save').mockImplementation(async (createUserDto) => {
+      jest.spyOn(usersRepository, 'save').mockImplementation(async (createUserDto) => {
         return {id: 1, email: createUserDto.email, password: createUserDto.password} as User;
       });
 
@@ -83,52 +54,46 @@ describe('UsersService', () => {
     });
   });
 
-  describe('update', () => {
-    it('should throw not found exception', async () => {
-      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => null);
-
-      await expect(usersService.update('1', {} as UserDto)).rejects.toThrowError(NotFoundException);
+  describe('getAssignedRole', () => {
+    it('if user not found, should throw error', async () => {
+      jest.spyOn(usersRepository, 'findOne').mockImplementation(async () => null);
+      expect(usersService.getAssignedRole(1)).rejects.toThrowError(NotFoundException);
     });
 
-    it('when using separate ids, should throw teapot exception', async () => {
-      const crazyId = '2';
-      const updateUserDto = {id: 1, email: 'admin@site.com', password: 'password'} as UserDto;
+    it('if user not assigned a role, should return null', async () => {
+      const userId = 1;
+      const user = new User({ id: userId });
+      jest.spyOn(usersRepository, 'findOne').mockImplementation(async () => user);
 
-      await expect(usersService.update(crazyId, updateUserDto)).rejects.toThrowError(ImATeapotException);
+      expect(await usersService.getAssignedRole(userId)).toBeNull();
+
     });
 
-    it('should return an updated user dto', async () => {
-      const id = "1";
-      const updateUserDto = {id: +id, email: 'admin@site.com', password: 'password'} as UserDto;
-      const newPassword = 'newPassword';
+    it('should return the user\'s assigned role', async () => {
+      const userId = 1;
+      const roleId = 1;
+      const role = new Role({ id: roleId });
+      const user = new User({ id: userId, role });
+      jest.spyOn(usersRepository, 'findOne').mockImplementation(async () => user);
 
-      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => updateUserDto as User);
+      expect(await usersService.getAssignedRole(userId)).toEqual(role);
 
-      jest.spyOn(userRepository, 'save').mockImplementation(async (_updateUserDto) => {
-        _updateUserDto.password = newPassword;
-        return _updateUserDto as User;
-      });
-
-      const updatedUser = usersService.convertToDto({ ...updateUserDto, password: newPassword, id: +id });
-      expect(await usersService.update(id, updateUserDto as UserDto)).toEqual(updatedUser);
     });
   });
 
-  describe('delete', () => {
-    it('should throw not found exception', async () => {
-      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => null);
+  describe('assignRole', () => {
+    it('should return a user with the role set', async () => {
+      const userId = 1;
+      const roleId = 1;
+      const user = new User({ id: userId });
+      const role = new Role({ id: roleId });
+      jest.spyOn(rolesRepository, 'findOne').mockImplementation(async () => role);
+      jest.spyOn(usersRepository, 'findOne').mockImplementation(async () => user);
+      const usersRepositorySpy = jest.spyOn(usersRepository, 'save').mockImplementation(async () => ({ ...user, role } as User));
 
-      await expect(usersService.remove('1')).rejects.toThrowError(NotFoundException);
-    });
+      await usersService.assignRole(userId, roleId);
 
-    it('should delete a user', async () => {
-      const user = {id: 1} as User;
-
-      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => user);
-
-      jest.spyOn(userRepository, 'delete').mockImplementation(async () => null);
-
-      expect(await usersService.remove(user.id.toString())).toBeNull();
+      expect(usersRepositorySpy).toHaveReturned();
     });
   });
 });

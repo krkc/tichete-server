@@ -1,42 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateRoleDto } from './dto/create-role.dto';
+import { Controller } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Crud, CrudController } from '@nestjsx/crud';
 import { RoleDto } from './dto/role.dto';
+import { Role } from './role.entity';
 import { RolesService } from './roles.service';
 
+@Crud({
+  model: {
+    type: RoleDto,
+  },
+})
 @ApiBearerAuth()
 @ApiTags('Roles')
 @Controller('roles')
-export class RolesController {
-  constructor(private readonly rolesService: RolesService) {}
-
-  @Get()
-  @ApiOperation({ summary: 'Get all roles' })
-  async getAll() {
-    return this.rolesService.findAll();
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a role by id' })
-  async getOne(@Param('id') id: string) {
-    return this.rolesService.findOne(id);
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Create a role' })
-  async create(@Body() createRoleDto: CreateRoleDto) {
-    return this.rolesService.create(createRoleDto);
-  }
-
-  @Put(':id')
-  @ApiOperation({ summary: 'Update a role' })
-  async update(@Param('id') id: string, @Body() updateRoleDto: RoleDto) {
-    return this.rolesService.update(id, updateRoleDto);
-  }
-
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a role' })
-  async remove(@Param('id') id: string) {
-    return this.rolesService.remove(id);
-  }
+export class RolesController implements CrudController<Role> {
+  constructor(public readonly service: RolesService) {}
 }

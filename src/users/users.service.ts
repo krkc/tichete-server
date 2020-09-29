@@ -1,4 +1,4 @@
-import { ImATeapotException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { classToPlain, plainToClass } from 'class-transformer';
@@ -8,65 +8,43 @@ import { UserDto } from './dto/user.dto';
 import { User } from './user.entity';
 import { Role } from '../roles/role.entity';
 import { RolesService } from '../roles/roles.service';
+import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
+import { RoleDto } from 'src/roles/dto/role.dto';
 
 @Injectable()
-export class UsersService {
+export class UsersService extends TypeOrmCrudService<User> {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    public repo: Repository<User>,
     private rolesService: RolesService
-  ) {}
-
-  async findAll(): Promise<UserDto[]> {
-    const users = await this.usersRepository.find();
-    return users.map(this.convertToDto);
-  }
-
-  async findOne(id: string): Promise<UserDto> {
-    const user = await this.usersRepository.findOne(id);
-    if (!user) throw new NotFoundException();
-
-    return this.convertToDto(user);
-  }
-
-  async findOneByEmail(email: string): Promise<UserDto> {
-    const user = await this.usersRepository.findOne({ email });
-    if (!user) throw new NotFoundException();
-
-    return this.convertToDto(user);
+  ) {
+    super(repo)
   }
 
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
-    const user = await this.usersRepository.save(this.usersRepository.create(createUserDto));
-    return this.convertToDto(user);
+    const newUser = await this.repo.save(this.repo.create(createUserDto));
+
+    return this.convertToDto(newUser);
   }
 
-  async update(id: string, updateUserDto: UserDto): Promise<UserDto> {
-    if (updateUserDto.id && +id !== updateUserDto.id) throw new ImATeapotException('Why are you using two separate ids? Trying to brew coffee in a teapot again?');
+  async getAssignedRole(id: number): Promise<RoleDto> {
+    const user = await this.repo.findOne(id, { relations: ['role'] });
+    if (!user) this.throwNotFoundException('User');
 
-    if (!await this.usersRepository.findOne(id)) throw new NotFoundException();
+    if (!user.role) return null;
 
-    const user = await this.usersRepository.save({ ...updateUserDto, id: Number(id) });
-    return this.convertToDto(user);
-  }
-
-  async remove(id: string): Promise<void> {
-    if (!await this.usersRepository.findOne(id)) throw new NotFoundException();
-
-    await this.usersRepository.delete(id);
-
-    return null;
+    return this.rolesService.convertToDto(user.role);
   }
 
   async assignRole(userId: number, roleId?: number): Promise<void> {
-    const role = await this.rolesService.findOne(roleId.toString());
-    const user = await this.usersRepository.findOne(userId);
+    const role = await this.rolesService.findOne(roleId?.toString());
+    const user = await this.repo.findOne(userId);
     user.role = role as Role;
-    this.usersRepository.save(user);
+    await this.repo.save(user);
   }
 
   async isPasswordCorrect(userId: number, plainPassword: string): Promise<boolean> {
-    const user = await this.usersRepository.findOne(userId);
+    const user = await this.repo.findOne(userId);
     if (!user) throw new NotFoundException();
 
     return argon2.verify(user.password, plainPassword);
