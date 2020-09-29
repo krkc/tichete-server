@@ -1,7 +1,8 @@
 import * as argon2 from 'argon2';
-import { Entity, Column, ManyToOne, BeforeInsert, Unique } from 'typeorm';
+import { Entity, Column, ManyToOne, BeforeInsert, Unique, OneToMany } from 'typeorm';
 import { Base } from '../base.abstract-entity';
 import { Role } from '../roles/role.entity';
+import { Ticket } from '../tickets/ticket.entity';
 
 @Entity()
 @Unique(['email'])
@@ -25,4 +26,7 @@ export class User extends Base {
 
   @ManyToOne(() => Role, role => role.users)
   role: Role;
+
+  @OneToMany(() => Ticket, ticket => ticket.creator)
+  submittedTickets: Ticket[];
 }
