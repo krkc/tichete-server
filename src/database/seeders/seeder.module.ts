@@ -1,7 +1,7 @@
 import { Logger, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { RolesModule } from '../../../src/roles/roles.module';
-import { configService } from "../../../src/config/config.service";
+import { configService } from "../../config/typeormconfig.service";
 import { UsersModule } from "../../../src/users/users.module";
 import { Seeder } from "./seeder";
 
