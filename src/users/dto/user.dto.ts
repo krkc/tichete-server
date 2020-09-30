@@ -1,6 +1,8 @@
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsEmail } from 'class-validator';
+import { TicketCategoryDto } from '../../tickets/categories/dto/ticket-category.dto';
+import { TicketDto } from '../../tickets/dto/ticket.dto';
 import { RoleDto } from '../roles/dto/role.dto';
 
 export class UserDto {
@@ -18,4 +20,8 @@ export class UserDto {
   @Exclude()
   @ApiHideProperty()
   role: RoleDto;
+
+  submittedTickets: TicketDto[];
+
+  subscriptions: TicketCategoryDto[];
 }

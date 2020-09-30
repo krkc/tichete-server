@@ -1,4 +1,5 @@
-import { UserDto } from "src/users/dto/user.dto";
+import { UserDto } from "../../users/dto/user.dto";
+import { TicketCategoryDto } from '../categories/dto/ticket-category.dto';
 import { TicketStatusDto } from "../statuses/dto/ticket-status.dto";
 
 export class TicketDto {
@@ -6,4 +7,5 @@ export class TicketDto {
   description: string;
   creator: UserDto;
   status: TicketStatusDto;
+  taggedCategories: TicketCategoryDto[];
 }

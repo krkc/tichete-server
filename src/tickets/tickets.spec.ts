@@ -13,6 +13,8 @@ import { UserDto } from '../users/dto/user.dto';
 import { TicketStatusesService } from './statuses/ticket-statuses.service';
 import { TicketStatus } from './statuses/ticket-status.entity';
 import { TicketStatusDto } from './statuses/dto/ticket-status.dto';
+import { TicketCategoriesService } from './categories/ticket-categories.service';
+import { TicketCategory } from './categories/ticket-category.entity';
 
 describe('TicketsService', () => {
   let ticketsService: TicketsService;
@@ -41,6 +43,11 @@ describe('TicketsService', () => {
         TicketStatusesService,
         {
           provide: getRepositoryToken(TicketStatus),
+          useClass: MockRepository,
+        },
+        TicketCategoriesService,
+        {
+          provide: getRepositoryToken(TicketCategory),
           useClass: MockRepository,
         },
       ],

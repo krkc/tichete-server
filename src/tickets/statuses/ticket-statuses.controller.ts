@@ -15,7 +15,7 @@ import { TicketStatusesService } from './ticket-statuses.service';
 })
 @ApiBearerAuth()
 @ApiTags('Ticket Statuses')
-@Controller('tickets/statuses')
+@Controller('ticket-statuses')
 export class TicketStatusesController implements CrudController<TicketStatus> {
   constructor(public readonly service: TicketStatusesService) {}
 }
