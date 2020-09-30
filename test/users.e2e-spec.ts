@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { UsersModule } from './../src/users/users.module';
-import { UsersService } from './../src/users/users.service';
+import { UsersModule } from '../src/users/users.module';
+import { UsersService } from '../src/users/users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from './../src/roles/role.entity';
-import { Repository } from 'typeorm';
-import { User } from './../src/users/user.entity';
+import { Role } from '../src/users/roles/role.entity';
+import { User } from '../src/users/user.entity';
+import { MockRepository } from '../src/repository.mock';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
-  const usersService = { findAll: () => ({ data: [ {} ] }) };
+  const usersService = { getMany: () => ({ data: [ {} ] }) };
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -19,9 +19,9 @@ describe('AppController (e2e)', () => {
       .overrideProvider(UsersService)
       .useValue(usersService)
       .overrideProvider(getRepositoryToken(User))
-      .useClass(Repository)
+      .useClass(MockRepository)
       .overrideProvider(getRepositoryToken(Role))
-      .useClass(Repository)
+      .useClass(MockRepository)
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -32,7 +32,7 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/users')
       .expect(200)
-      .expect(usersService.findAll());
+      .expect(usersService.getMany());
   });
 
   afterAll(async () => {

@@ -1,7 +1,9 @@
-import { Controller, Get, Param, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Crud, CrudController, CrudRequestInterceptor } from '@nestjsx/crud';
+import { Crud, CrudController } from '@nestjsx/crud';
+import { UserDto } from '../users/dto/user.dto';
 import { TicketDto } from './dto/ticket.dto';
+import { TicketStatusDto } from './statuses/dto/ticket-status.dto';
 import { Ticket } from './ticket.entity';
 import { TicketsService } from './tickets.service';
 
@@ -19,9 +21,15 @@ import { TicketsService } from './tickets.service';
 export class TicketsController implements CrudController<Ticket> {
   constructor(public readonly service: TicketsService) {}
 
-  @ApiOperation({ summary: 'Retrieve the user who created a ticket' })
-  @Get('/:id/users')
-  async getTicketCreator(@Param('id') id: number) {
-    return this.service.getTicketCreator(id);
+  @ApiOperation({ summary: 'Set the user who created a ticket' })
+  @Post('/:id/creator')
+  async setTicketCreator(@Param('id') id: number, @Body() user: UserDto) {
+    return this.service.setTicketCreator(id, user);
+  }
+
+  @ApiOperation({ summary: 'Set the status of a ticket' })
+  @Post('/:id/status')
+  async setTicketStatus(@Param('id') id: number, @Body() status: TicketStatusDto) {
+    return this.service.setTicketStatus(id, status);
   }
 }

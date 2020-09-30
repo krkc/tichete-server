@@ -1,6 +1,7 @@
 import { Base } from '../base.abstract-entity';
 import { User } from '../users/user.entity';
-import {Column, Entity, JoinColumn, ManyToOne, } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, } from 'typeorm';
+import { TicketStatus } from './statuses/ticket-status.entity';
 
 @Entity()
 export class Ticket extends Base {
@@ -16,4 +17,7 @@ export class Ticket extends Base {
   @ManyToOne(() => User, user => user.submittedTickets)
   @JoinColumn({ name: 'creatorId' })
   creator: User;
+
+  @ManyToOne(() => TicketStatus, ticketStatus => ticketStatus.tickets)
+  status: TicketStatus;
 }
