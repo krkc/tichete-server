@@ -1,9 +1,9 @@
 import { Base } from '../base/base.abstract-entity';
 import { User } from '../users/user.entity';
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { TicketStatus } from './statuses/ticket-status.entity';
-import { TicketCategory } from './categories/ticket-category.entity';
 import { Assignment } from '../assignments/assignment.entity';
+import { Tag } from '../tags/tag.entity';
 
 @Entity()
 export class Ticket extends Base {
@@ -26,9 +26,10 @@ export class Ticket extends Base {
   @ManyToOne(() => TicketStatus, ticketStatus => ticketStatus.tickets)
   status: TicketStatus;
 
-  @ManyToMany(() => TicketCategory)
-  @JoinTable({ name: 'tags' })
-  taggedCategories: TicketCategory[];
+  @OneToMany(() => Tag, tag => tag.ticket, {
+    cascade: true
+  })
+  taggedCategories: Tag[];
 
   @OneToMany(() => Assignment, assignment => assignment.ticket, {
     cascade: true

@@ -1,10 +1,10 @@
 import * as argon2 from 'argon2';
-import { Entity, Column, ManyToOne, BeforeInsert, Unique, OneToMany, JoinTable, ManyToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, BeforeInsert, Unique, OneToMany } from 'typeorm';
 import { Base } from '../base/base.abstract-entity';
 import { Role } from '../users/roles/role.entity';
 import { Ticket } from '../tickets/ticket.entity';
-import { TicketCategory } from '../tickets/categories/ticket-category.entity';
 import { Assignment } from '../assignments/assignment.entity';
+import { Subscription } from '../subscriptions/subscription.entity';
 
 @Entity()
 @Unique(['email'])
@@ -40,7 +40,8 @@ export class User extends Base {
   })
   assignedTickets: Assignment[];
 
-  @ManyToMany(() => TicketCategory)
-  @JoinTable({ name: 'subscriptions' })
-  subscriptions: TicketCategory[];
+  @OneToMany(() => Subscription, subscription => subscription.user, {
+    cascade: true
+  })
+  subscriptions: Subscription[];
 }
