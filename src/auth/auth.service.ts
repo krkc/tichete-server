@@ -18,7 +18,7 @@ export class AuthService {
       return null;
     }
 
-    return this.usersService.convertToDto(user);
+    return this.usersService.convertToDto(user, UserDto);
   }
 
   async getAuthToken(user: UserDto) {

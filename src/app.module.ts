@@ -7,6 +7,7 @@ import { RolesModule } from './users/roles/roles.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { AssignmentsModule } from './assignments/assignments.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { TicketsModule } from './tickets/tickets.module';
     UsersModule,
     RolesModule,
     AuthModule,
-    TicketsModule
+    TicketsModule,
+    AssignmentsModule
   ],
   controllers: [AppController],
 })

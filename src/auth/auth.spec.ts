@@ -7,8 +7,6 @@ import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
 import * as argon2 from 'argon2';
 import { LoggerService } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserDto } from '../users/dto/user.dto';
 import { RolesService } from '../users/roles/roles.service';
 import { Role } from '../users/roles/role.entity';
@@ -59,11 +57,11 @@ describe('The Authentication Service', () => {
 
   describe('when validating an authenticating user', () => {
     it('if user found and passwords match, should return the user without the password field', async () => {
-      users = [{email, password: await argon2.hash(pass)} as User];
-      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => ({ ...users[0], id: 1 } as User));
+      users = [{email, password: await argon2.hash(pass)} as UserDto];
+      jest.spyOn(userRepository, 'findOne').mockImplementation(async () => ({ ...users[0], id: 1 } as any as User));
 
       const validatedUser = await authService.validateAndGetUser(email, pass);
-      expect(validatedUser).toEqual(usersService.convertToDto({ ...users[0], id: 1}));
+      expect(validatedUser).toEqual(usersService.convertToDto({ ...users[0], id: 1}, UserDto));
     });
 
     it('if user not found, should return null', async () => {
@@ -79,53 +77,6 @@ describe('The Authentication Service', () => {
       const user = { id: 1 } as UserDto;
       const token = await authService.getAuthToken(user);
       expect(token).toEqual({access_token: ''});
-    });
-  });
-});
-
-describe('The AppController\'s Auth Routes', () => {
-  let authController: AuthController;
-  let usersService: UsersService;
-
-  beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
-      controllers: [AuthController],
-      providers: [
-        AuthService,
-        UsersService,
-        {
-          provide: getRepositoryToken(User),
-          useClass: MockRepository,
-        },
-        RolesService,
-        {
-          provide: getRepositoryToken(Role),
-          useClass: MockRepository,
-        },
-        {
-          provide: JwtService,
-          useFactory: () => ({ sign: () => '' })
-        }
-      ],
-    }).compile();
-
-    authController = moduleRef.get<AuthController>(AuthController);
-    usersService = moduleRef.get<UsersService>(UsersService);
-  });
-
-  describe('when logging in an authenticated user', () => {
-    it('should contain an access token in the response data', async () => {
-      const token = await authController.login({ user: new UserDto() });
-      expect(token).toEqual({access_token: ''});
-    });
-  });
-
-  describe('when registering a new user', () => {
-    it('upon receiving valid input, should return a new user', async () => {
-      const createUserDto = new CreateUserDto();
-      jest.spyOn(usersService, 'create').mockImplementation(async (_createUserDto: CreateUserDto) => _createUserDto as UserDto);
-      const user = await authController.register(createUserDto);
-      expect(user).toEqual(createUserDto as UserDto);
     });
   });
 });

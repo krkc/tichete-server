@@ -1,4 +1,4 @@
-import { Base } from '../../base.abstract-entity';
+import { Base } from '../../base/base.abstract-entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Ticket } from '../ticket.entity';
 

@@ -5,6 +5,7 @@ import { UsersService } from '../../../src/users/users.service';
 import commandLineArgs from 'command-line-args';
 import { CreateRoleDto } from '../../users/roles/dto/create-role.dto';
 import { CreateUserDto } from '../../users/dto/create-user.dto';
+import { RoleDto } from '../../users/roles/dto/role.dto';
 
 export interface CommandLineArgsOptions extends commandLineArgs.CommandLineOptions {
   truncate: boolean;
@@ -50,9 +51,9 @@ export class Seeder {
     createAdminUser.password = await argon2.hash('password');
     createAdminUser.firstName = 'Site';
     createAdminUser.lastName = 'Admin';
+    createAdminUser.roleId = adminRole.id;
 
-    const newUser = await this.usersService.create(createAdminUser);
-    await this.usersService.assignRole(newUser.id, adminRole.id);
+    await this.usersService.repo.save(createAdminUser);
     await new Promise(resolve => setTimeout(resolve, 500)); // https://github.com/nestjs/typeorm/issues/646
     this.logger.debug('Admin user created.');
   }
@@ -67,7 +68,7 @@ export class Seeder {
     const createAdminRole = new CreateRoleDto();
     createAdminRole.name = 'Administrator';
 
-    const createdRole = await this.rolesService.create(createAdminRole);
+    const createdRole = this.rolesService.convertToDto(await this.rolesService.repo.save(createAdminRole), RoleDto);
     this.logger.debug('Admin role created.'); // or .verbose()
 
     return createdRole;

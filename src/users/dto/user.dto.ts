@@ -21,7 +21,15 @@ export class UserDto {
   @ApiHideProperty()
   role: RoleDto;
 
+  @Exclude()
+  @ApiHideProperty()
   submittedTickets: TicketDto[];
 
+  @Exclude()
+  @ApiHideProperty()
+  assignedTickets: TicketDto[];
+
+  @Exclude()
+  @ApiHideProperty()
   subscriptions: TicketCategoryDto[];
 }
