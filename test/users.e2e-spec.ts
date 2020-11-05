@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { UsersModule } from '../src/users/users.module';
-import { UsersService } from '../src/users/users.service';
+import { UsersModule } from '../src/domain/users/users.module';
+import { UsersService } from '../src/domain/users/users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from '../src/users/roles/role.entity';
-import { User } from '../src/users/user.entity';
+import { Role } from '../src/domain/users/roles/role.entity';
+import { User } from '../src/domain/users/user.entity';
 import { MockRepository } from '../src/repository.mock';
 
 describe('AppController (e2e)', () => {

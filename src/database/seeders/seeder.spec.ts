@@ -1,10 +1,10 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Role } from '../../users/roles/role.entity';
-import { RolesService } from '../../users/roles/roles.service';
+import { Role } from '../../domain/users/roles/role.entity';
+import { RolesService } from '../../domain/users/roles/roles.service';
 import { Repository } from 'typeorm';
-import { User } from '../../users/user.entity';
-import { UsersService } from '../../users/users.service';
+import { User } from '../../domain/users/user.entity';
+import { UsersService } from '../../domain/users/users.service';
 import { Logger, LoggerService } from '@nestjs/common';
 import { CommandLineArgsOptions, Seeder } from './seeder';
 import { MockRepository } from '../../repository.mock';

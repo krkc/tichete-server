@@ -4,10 +4,8 @@
   "compilerOptions": {
     "plugins": [
       {
-        "name": "@nestjs/swagger/plugin",
+        "name": "@nestjs/graphql/plugin",
         "options": {
-          "dtoFileNameSuffix": [".dto.ts"],
-          "classValidatorShim": false
         }
       }
     ]

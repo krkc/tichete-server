@@ -4,7 +4,7 @@ import { Controller, Get, Redirect, SetMetadata } from '@nestjs/common';
 export class AppController {
   @Get()
   @SetMetadata('override-rejection', true)
-  @Redirect('api')
+  @Redirect('graphql')
   getApi() {
     return;
   }

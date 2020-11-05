@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../users/user.entity';
-import { UsersService } from '../users/users.service';
+import { User } from '../domain/users/user.entity';
+import { UsersService } from '../domain/users/users.service';
 import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
 import * as argon2 from 'argon2';
 import { LoggerService } from '@nestjs/common';
-import { UserDto } from '../users/dto/user.dto';
-import { RolesService } from '../users/roles/roles.service';
-import { Role } from '../users/roles/role.entity';
+import { UserDto } from '../domain/users/dto/user.dto';
+import { RolesService } from '../domain/users/roles/roles.service';
+import { Role } from '../domain/users/roles/role.entity';
 import { MockRepository } from '../repository.mock';
 
 describe('The Authentication Service', () => {
@@ -75,8 +75,8 @@ describe('The Authentication Service', () => {
   describe('when logging an authenticated user in', () => {
     it('should generate an access token', async () => {
       const user = { id: 1 } as UserDto;
-      const token = await authService.getAuthToken(user);
-      expect(token).toEqual({access_token: ''});
+      const token = await authService.setAuthToken(user);
+      expect(token).toEqual({accessToken: ''});
     });
   });
 });

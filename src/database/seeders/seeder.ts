@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { RolesService } from '../../../src/users/roles/roles.service';
-import { UsersService } from '../../../src/users/users.service';
+import { RolesService } from '../../domain/users/roles/roles.service';
+import { UsersService } from '../../domain/users/users.service';
 import commandLineArgs from 'command-line-args';
-import { CreateRoleDto } from '../../users/roles/dto/create-role.dto';
-import { CreateUserDto } from '../../users/dto/create-user.dto';
-import { RoleDto } from '../../users/roles/dto/role.dto';
+import { CreateRoleDto } from '../../domain/users/roles/dto/create-role.dto';
+import { CreateUserDto } from '../../domain/users/dto/create-user.dto';
+import { RoleDto } from '../../domain/users/roles/dto/role.dto';
 
 export interface CommandLineArgsOptions extends commandLineArgs.CommandLineOptions {
   truncate: boolean;
@@ -40,7 +40,7 @@ export class Seeder {
   private async adminUser() {
     const adminRole = await this.adminRole();
 
-    const adminUser = await this.usersService.findOne('1');
+    const adminUser = await this.usersService.repo.findOne('1');
     if (adminUser) {
       this.logger.debug('Admin user already exists, skipping.');
       return adminUser;
@@ -59,7 +59,7 @@ export class Seeder {
   }
 
   private async adminRole() {
-    const adminRole = await this.rolesService.findOne('1');
+    const adminRole = await this.rolesService.repo.findOne('1');
     if (adminRole) {
       this.logger.debug('Admin role already exists, skipping.');
       return adminRole;
