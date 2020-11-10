@@ -10,10 +10,11 @@ function decapitalizeFirstLetter(string) {
   return string[0].toLocaleLowerCase() + string.slice(1);
 }
 
-export function createBaseResolver<TResource extends Base, TNewInputType>(
+export function createBaseResolver<TResource extends Base, TNewInputType, TUpdateInputType>(
   suffix: string,
   resourceCls: ClassType<TResource>,
-  newInputCls: ClassType<TNewInputType>
+  newInputCls: ClassType<TNewInputType>,
+  updateInputCls: ClassType<TUpdateInputType>
 ) {
   const resourceName = decapitalizeFirstLetter(resourceCls.name);
   const resourcesName = decapitalizeFirstLetter(suffix);
@@ -42,7 +43,19 @@ export function createBaseResolver<TResource extends Base, TNewInputType>(
     ): Promise<TResource[]> {
       const resources = await this.service.create(inputTypeCls);
       pubSub.publish(`${resourceCls.name}Added`, { resourceAdded: resources });
-      return resources as any as TResource[];
+
+      return resources;
+    }
+
+    @Roles('Administrator')
+    @Mutation(() => [resourceCls], { name: `update${resourceCls.name}` })
+    async update(
+      @Args(`update${resourceCls.name}Data`, { type: () => [updateInputCls]}) inputTypeCls: TUpdateInputType[],
+    ): Promise<TResource[]> {
+      const resources = await this.service.update(inputTypeCls);
+      pubSub.publish(`${resourceCls.name}Updated`, { resourceUpdated: resources });
+
+      return resources;
     }
 
     @Roles('Administrator')
@@ -52,7 +65,8 @@ export function createBaseResolver<TResource extends Base, TNewInputType>(
     ): Promise<TResource[]> {
       const resources = await this.service.delete(resourceIds);
       pubSub.publish(`${resourceCls.name}Removed`, { resourcesRemoved: resources });
-      return resources as any as TResource[];
+
+      return resources;
     }
   }
 

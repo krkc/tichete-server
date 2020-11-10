@@ -1,23 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Resolver } from '@nestjs/graphql';
 import { PubSub } from 'apollo-server-express';
 import { AssignmentsService } from './assignments.service';
 import { Assignment } from './assignment.entity';
 import { createBaseResolver } from '../../base/base.abstract-resolver';
-import { UsersService } from '../users/users.service';
-import { TicketsService } from '../tickets/tickets.service';
 import { Ticket } from '../tickets/ticket.entity';
 import { Roles } from '../../decorators/roles.decorator';
 import { NewUserAssignmentArgs } from './dto/new-user-assignment.args';
 import { User } from '../users/user.entity';
 import { NewTicketAssignmentArgs } from './dto/new-ticket-assignment.args';
 import { NewAssignmentInput } from './dto/new-assignment.input';
+import { UpdateAssignmentInput } from './dto/update-assignment.input';
 
 const pubSub = new PubSub();
 
 @Injectable()
 @Resolver()
-export class AssignmentsResolver extends createBaseResolver(`${Assignment.name}s`, Assignment, NewAssignmentInput) {
+export class AssignmentsResolver extends createBaseResolver(`${Assignment.name}s`, Assignment, NewAssignmentInput, UpdateAssignmentInput) {
   constructor(
     protected readonly service: AssignmentsService
   ) {
@@ -63,9 +62,4 @@ export class AssignmentsResolver extends createBaseResolver(`${Assignment.name}s
     pubSub.publish('ticketAssignmentRemoved', { ticketAssignmentRemoved: ticketAssignment });
     return ticketAssignment;
   }
-
-  // @Query(result => [Ticket])
-  // protected async availableTickets(@Args('ticketId') ticketId: number): Promise<Ticket[]> {
-  //   return this.service.getAvailableTicketsForUser(ticketId);
-  // }
 }

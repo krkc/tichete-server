@@ -1,8 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { NewTagInput } from 'src/domain/tags/dto/new-tag.input';
-import { Tag } from 'src/domain/tags/tag.entity';
-import { Base } from '../../../base/base.abstract-entity';
-import { Ticket } from '../ticket.entity';
+import { UpdateTagInput } from '../../../domain/tags/dto/update-tag.input';
 
 @InputType()
 export class UpdateTicketInput {
@@ -13,6 +10,6 @@ export class UpdateTicketInput {
   creatorId?: number;
   @Field(() => Int)
   statusId?: number;
-  @Field(() => [NewTagInput])
-  taggedCategories?: NewTagInput[];
+  @Field(() => [UpdateTagInput])
+  tags?: UpdateTagInput[];
 }
