@@ -11,10 +11,10 @@ export class NewUserInput {
   @IsNotEmpty()
   password: string;
 
-  @Optional()
+  username?: string;
+
   firstName?: string;
 
-  @Optional()
   lastName?: string;
 
   // @Optional()

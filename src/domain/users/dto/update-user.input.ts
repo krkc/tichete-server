@@ -10,12 +10,11 @@ export class UpdateUserInput {
   @IsEmail()
   email: string;
 
-  @IsNotEmpty()
-  password: string;
+  username?: string;
 
-  @Optional()
+  password?: string;
+
   firstName?: string;
 
-  @Optional()
   lastName?: string;
 }

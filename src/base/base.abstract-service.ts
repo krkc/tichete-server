@@ -1,6 +1,6 @@
 import { classToPlain, plainToClass } from 'class-transformer';
 import { ClassType } from 'class-transformer/ClassTransformer';
-import { Repository, In } from 'typeorm';
+import { Repository, In, DeepPartial } from 'typeorm';
 import { Base } from './base.abstract-entity';
 import { PaginationArgs } from './pagination.args';
 
@@ -18,16 +18,17 @@ export abstract class BaseService<T extends Base> {
   }
 
   async create(data: any[]): Promise<T[]> {
-    return this.repo.save(data);
+    return this.repo.save(this.repo.create(data) as any as DeepPartial<T>[]);
   }
 
   async update(data: any[]): Promise<T[]> {
-    return this.repo.save(data);
+    return this.repo.save(this.repo.create(data) as any as DeepPartial<T>[]);
   }
 
-  async delete(itemIds: number[]): Promise<T[]> {
+  async delete(itemIds: number[]): Promise<number[]> {
     const items = await this.repo.find({ where: { id: In(itemIds) } });
-    return this.repo.remove(items);
+    await this.repo.remove(items);
+    return itemIds;
   };
 
   convertToDto<T>(entity: any, dto: ClassType<T>): T {
