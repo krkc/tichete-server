@@ -43,24 +43,40 @@ export class TicketsService extends BaseService<Ticket> {
       const resourceWithRelationships = await this.resolveRelationships(resource, datum, relationships);
       resources.push(resourceWithRelationships || resource);
     }
-
-    return await this.repo.save(resources);
+    const tickets = await this.repo.save(resources);
+    // .tags is a promise... so when the client receives this
+    // response, there's no tags on the other end.
+    // TODO: need more elegant way to do this.
+    const ticketsOut = [];
+    for (const ticket of tickets) {
+      ticketsOut.push({
+        ...ticket,
+        creator: await ticket.creator,
+        assignments: await ticket.assignments,
+        tags: await ticket.tags,
+      });
+    }
+    return ticketsOut as Ticket[];
   }
 
   protected async resolveRelationships(resource: Ticket, updateInputData: UpdateTicketInput, relationships: string[]) {
     // https://github.com/typeorm/typeorm/issues/2121
+    // Remove any tags
     const tagsToRemove = await this.tagsService.repo.find({
       ticketId: updateInputData.id,
       categoryId: Not(In(updateInputData.tags.map(tag => tag.categoryId)))
     });
     await this.tagsService.repo.remove(tagsToRemove);
 
-    resource.tags = Promise.resolve(updateInputData.tags.map(t => {
+    // Add/update any tags
+    resource.tags = Promise.resolve(updateInputData.tags.map(tag => {
       // https://github.com/typeorm/typeorm/issues/7038
-      t.ticketId = t.ticketId ?? undefined;
-      t.categoryId = t.categoryId ?? undefined;
-      return t;
+      tag.ticketId = tag.ticketId ?? undefined;
+      tag.categoryId = tag.categoryId ?? undefined;
+      return tag;
     }) as any);
+
+    // Add/update any remaining properties
     for (const propertyName in updateInputData) {
       if (Object.prototype.hasOwnProperty.call(updateInputData, propertyName)) {
         const property = updateInputData[propertyName];
