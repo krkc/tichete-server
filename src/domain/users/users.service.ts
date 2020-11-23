@@ -4,24 +4,33 @@ import { Repository } from 'typeorm';
 import * as argon2 from 'argon2';
 import { User } from './user.entity';
 import { BaseService } from '../../base/base.abstract-service';
-import { UsersArgs } from './dto/users.args';
-import { NewUserInput } from './dto/new-user.input';
-import { Ticket } from '../tickets/ticket.entity';
+import { Subscription } from '../subscriptions/subscription.entity';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { Assignment } from '../assignments/assignment.entity';
+import { AssignmentsService } from '../assignments/assignments.service';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
   constructor(
-    @InjectRepository(User)
-    public repo: Repository<User>  ) {
+    @InjectRepository(User) public repo: Repository<User>,
+    private subscriptionsService: SubscriptionsService,
+    private assignmentsService: AssignmentsService,
+  ) {
     super(repo)
-  }
 
-  // async create(data: NewUserInput): Promise<User> {
-  //   return await this.repo.save(this.repo.create(data));
-  // }
+    this.m2mRelationships[this.nameof<User>('subscriptions')] = {
+      class: Subscription,
+      service: this.subscriptionsService,
+      srcIdColName: 'userId',
+      relIdColName: 'categoryId',
+    };
 
-  async findAll(usersArgs: UsersArgs): Promise<User[]> {
-    return this.repo.find();
+    this.m2mRelationships[this.nameof<User>('assignments')] = {
+      class: Assignment,
+      service: this.assignmentsService,
+      srcIdColName: 'userId',
+      relIdColName: 'ticketId',
+    };
   }
 
   async isPasswordCorrect(userId: number, plainPassword: string): Promise<boolean> {
