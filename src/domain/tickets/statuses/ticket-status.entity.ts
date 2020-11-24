@@ -10,5 +10,5 @@ export class TicketStatus extends Base {
   name!: string;
 
   @OneToMany(() => Ticket, ticket => ticket.status)
-  tickets?: Ticket[];
+  tickets?: Promise<Ticket[]>;
 }

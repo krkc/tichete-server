@@ -14,8 +14,8 @@ export class Subscription extends Base {
   public categoryId!: number;
 
   @ManyToOne(() => User, user => user.subscriptions)
-  public user!: User;
+  public user?: Promise<User>;
 
-  @ManyToOne(() => TicketCategory, category => category.subscribedUsers)
-  public category!: TicketCategory;
+  @ManyToOne(() => TicketCategory, category => category.subscriptions)
+  public category?: Promise<TicketCategory>;
 }

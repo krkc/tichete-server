@@ -30,11 +30,11 @@ export abstract class BaseService<T extends Base> {
     return this.repo.find({skip: args?.skip, take: args?.take});
   }
 
-  async create(data: any[]): Promise<T[]> {
+  async create(data: DeepPartial<T>[]): Promise<T[]> {
     return this.repo.save(this.repo.create(data) as any as DeepPartial<T>[]);
   }
 
-  async update(updateResourceInputs: any[]): Promise<T[]> {
+  async update(updateResourceInputs: Partial<T>[]): Promise<T[]> {
     const resources: T[] = [];
     for (const updateResourceInput of updateResourceInputs) {
       const resource = await this.repo.findOne(updateResourceInput.id);

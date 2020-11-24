@@ -1,7 +1,5 @@
-import { Optional } from '@nestjs/common';
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { Role } from '../roles/role.entity';
 
 @InputType()
 export class NewUserInput {
@@ -17,6 +15,5 @@ export class NewUserInput {
 
   lastName?: string;
 
-  // @Optional()
-  // role?: Role;
+  roleId?: number;
 }

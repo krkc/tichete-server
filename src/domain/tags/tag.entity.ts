@@ -16,6 +16,6 @@ export class Tag extends Base {
   @ManyToOne(() => Ticket, ticket => ticket.tags)
   public ticket?: Promise<Ticket>;
 
-  @ManyToOne(() => TicketCategory, category => category.taggedTickets)
+  @ManyToOne(() => TicketCategory, category => category.tags)
   public category?: Promise<TicketCategory>;
 }

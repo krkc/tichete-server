@@ -10,11 +10,13 @@ export class TicketCategory extends Base {
   @Column()
   name!: string;
 
-  @OneToMany(() => Tag, tag => tag.category)
-  taggedTickets?: Tag[];
+  @OneToMany(() => Tag, tag => tag.category, {
+    cascade: true
+  })
+  tags?: Promise<Tag[]>;
 
   @OneToMany(() => Subscription, subscription => subscription.category, {
     cascade: true
   })
-  subscribedUsers?: Subscription[];
+  subscriptions?: Promise<Subscription[]>;
 }

@@ -17,7 +17,7 @@ export class TicketsResolver extends createBaseResolver(`${Ticket.name}s`, Ticke
     super(service);
   }
 
-  @ResolveField()
+  @ResolveField(() => [Tag])
   async tags(
     @Parent() ticket: Ticket,
     @Loader({ loaderName: TagLoader.name, data: { keyColumnName: 'ticketId' } }) tagLoader: DataLoader<Ticket['id'], Tag[]>

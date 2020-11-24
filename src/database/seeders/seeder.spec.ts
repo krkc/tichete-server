@@ -8,11 +8,13 @@ import { UsersService } from '../../domain/users/users.service';
 import { Logger, LoggerService } from '@nestjs/common';
 import { CommandLineArgsOptions, Seeder } from './seeder';
 import { MockRepository } from '../../repository.mock';
+import { Subscription } from '../../domain/subscriptions/subscription.entity';
+import { Assignment } from '../../domain/assignments/assignment.entity';
+import { SubscriptionsService } from '../../domain/subscriptions/subscriptions.service';
+import { AssignmentsService } from '../../domain/assignments/assignments.service';
 
 describe('Seeder', () => {
   let seeder: Seeder;
-  let rolesService: RolesService;
-  let usersService: UsersService;
   let logger: LoggerService;
   let userRepository: Repository<User>;
   let roleRepository: Repository<Role>;
@@ -30,16 +32,24 @@ describe('Seeder', () => {
           provide: getRepositoryToken(Role),
           useClass: MockRepository,
         },
+        SubscriptionsService,
+        {
+          provide: getRepositoryToken(Subscription),
+          useClass: MockRepository,
+        },
+        AssignmentsService,
+        {
+          provide: getRepositoryToken(Assignment),
+          useClass: MockRepository,
+        },
         Seeder,
         Logger
       ],
     }).compile();
 
     seeder = moduleRef.get<Seeder>(Seeder);
-    rolesService = moduleRef.get<RolesService>(RolesService);
     userRepository = moduleRef.get<Repository<User>>(getRepositoryToken(User));
     roleRepository = moduleRef.get<Repository<Role>>(getRepositoryToken(Role));
-    usersService = moduleRef.get<UsersService>(UsersService);
     logger = moduleRef.get<Logger>(Logger);
   });
 
@@ -48,12 +58,10 @@ describe('Seeder', () => {
       jest.spyOn(logger, 'debug').mockImplementation(() => null);
 
       jest.spyOn(roleRepository, 'findOne').mockImplementationOnce(async () => null);
-      jest.spyOn(roleRepository, 'save').mockImplementation(async () => ({id: 1} as Role));
-      jest.spyOn(roleRepository, 'findOne').mockImplementationOnce(async () => ({id: 1} as Role));
+      jest.spyOn(roleRepository, 'save').mockImplementation(async () => ([{id: 1}] as any));
 
       jest.spyOn(userRepository, 'findOne').mockImplementationOnce(async () => null);
-      jest.spyOn(userRepository, 'save').mockImplementation(async () => null);
-      jest.spyOn(userRepository, 'findOne').mockImplementationOnce(async () => ({id: 1} as User));
+      jest.spyOn(userRepository, 'save').mockImplementation(async () => ([{id: 1}] as any));
 
       await seeder.run({ prod: true } as any as CommandLineArgsOptions);
 

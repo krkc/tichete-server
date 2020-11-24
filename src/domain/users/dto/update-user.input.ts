@@ -1,14 +1,13 @@
-import { Optional } from '@nestjs/common';
-import { InputType, Field } from '@nestjs/graphql';
-import { IsEmail, IsNotEmpty } from 'class-validator';
-import { Role } from '../roles/role.entity';
+import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsEmail } from 'class-validator';
+import { UpdateSubscriptionInput } from 'src/domain/subscriptions/dto/update-subscription.input';
 
 @InputType()
 export class UpdateUserInput {
   id: number;
 
   @IsEmail()
-  email: string;
+  email?: string;
 
   username?: string;
 
@@ -17,4 +16,10 @@ export class UpdateUserInput {
   firstName?: string;
 
   lastName?: string;
+
+  @Field(() => Int)
+  roleId?: number;
+
+  @Field(() => [UpdateSubscriptionInput])
+  subscriptions? : UpdateSubscriptionInput[];
 }
