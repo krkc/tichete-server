@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -6,13 +6,6 @@ import { AuthGuard } from '@nestjs/passport';
 export class LocalAuthGuard extends AuthGuard('local') {
   canActivate(context: ExecutionContext) {
     return super.canActivate(context);
-  }
-
-  handleRequest(err, user) {
-    if (err || !user) {
-      throw err || new UnauthorizedException();
-    }
-    return user;
   }
 
   getRequest(context: ExecutionContext) {
