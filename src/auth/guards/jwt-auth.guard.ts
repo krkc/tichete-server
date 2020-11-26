@@ -3,7 +3,6 @@ import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../../domain/users/user.entity';
-import { Role } from '../../domain/users/roles/role.entity';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
