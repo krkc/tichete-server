@@ -1,23 +1,46 @@
-version: '3.3'
+version: '3.8'
 
 services:
-  db:
-    image: mysql:8.0.21
-    restart: always
+  app:
+    container_name: app
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+      - 9229:9229
+    command: npm run start:debug
+    env_file:
+      - .env
+    networks:
+      - backend
     environment:
-      - MYSQL_DATABASE=my-db
+      DB_HOST: db
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: mysql:8.0.22
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - backend
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_USER=${DB_USERNAME}
       - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_TCP_PORT=${DB_PORT}
     ports:
       # <Port exposed> : < MySQL Port running inside container>
-      - "${DB_PORT}:${DB_PORT}"
-    expose:
-      # Opens port 3306 on the container
-      - "${DB_PORT}"
+      - ${DB_PORT}:${DB_PORT}
     # Where our data will be persisted
     volumes:
       - my-db:/var/lib/mysql
-  # Names our volume
-  volumes:
-    my-db:
+networks:
+  backend:
+# Names our volume
+volumes:
+  my-db:

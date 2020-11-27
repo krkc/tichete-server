@@ -1,9 +1,9 @@
 {
   "name": "tichete-server",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "description": "",
-  "license": "UNLICENSED",
+  "license": "GPLv3",
   "author": "",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -13,7 +13,7 @@
     "seed": "ts-node -r tsconfig-paths/register src/scripts/seed.ts",
     "seed:prod": "ts-node -r tsconfig-paths/register src/scripts/seed.ts --prod",
     "start": "nest start",
-    "start:debug": "nest start --debug --watch",
+    "start:debug": "nest start --debug 0.0.0.0:9229 --watch",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "test": "jest",

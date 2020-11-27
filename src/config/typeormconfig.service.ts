@@ -14,7 +14,7 @@ class TypeOrmConfigService {
       throw new Error(`config error - missing env.${key}`);
     }
 
-    return value;
+    return value.replace(/"([^"]+(?="))"/g, '$1');
   }
 
   public ensureValues(keys: string[]) {
@@ -23,7 +23,7 @@ class TypeOrmConfigService {
   }
 
   public getPort() {
-    return this.getValue('PORT', true);
+    return this.getValue('DB_PORT', true);
   }
 
   public isProduction() {
