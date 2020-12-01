@@ -1,6 +1,7 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsEmail } from 'class-validator';
-import { UpdateSubscriptionInput } from 'src/domain/subscriptions/dto/update-subscription.input';
+import { UpdateAssignmentInput } from '../../assignments/dto/update-assignment.input';
+import { UpdateSubscriptionInput } from '../../subscriptions/dto/update-subscription.input';
 
 @InputType()
 export class UpdateUserInput {
@@ -19,6 +20,9 @@ export class UpdateUserInput {
 
   @Field(() => Int)
   roleId?: number;
+
+  @Field(() => [UpdateAssignmentInput])
+  assignments?: UpdateAssignmentInput[];
 
   @Field(() => [UpdateSubscriptionInput])
   subscriptions? : UpdateSubscriptionInput[];

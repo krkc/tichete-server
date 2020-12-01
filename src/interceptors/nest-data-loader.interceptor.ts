@@ -28,6 +28,10 @@ export interface NestDataLoader<ID, Type> {
  */
 export interface LoaderOptions {
   /**
+   * Class name of the relationship
+   */
+  relName: string;
+  /**
    * Class name of the custom loader
    */
   loaderName: string;
@@ -50,22 +54,23 @@ export const NEST_LOADER_CONTEXT_KEY = "NEST_LOADER_CONTEXT_KEY";
 
 @Injectable()
 export class DataLoaderInterceptor implements NestInterceptor {
-  constructor(private readonly moduleRef: ModuleRef) { }
+  constructor(private readonly moduleRef: ModuleRef, private t: string) { }
   /**
    * @inheritdoc
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const graphqlExecutionContext = GqlExecutionContext.create(context);
     const ctx = graphqlExecutionContext.getContext();
+    const contextKey = `${NEST_LOADER_CONTEXT_KEY}_${this.t}`;
 
-    if (ctx[NEST_LOADER_CONTEXT_KEY] === undefined) {
-      ctx[NEST_LOADER_CONTEXT_KEY] = {
+    if (ctx[contextKey] === undefined) {
+      ctx[contextKey] = {
         contextId: ContextIdFactory.create(),
         getLoader: (loaderData: LoaderOptions) : Promise<NestDataLoader<any, any>> => {
           if (ctx[loaderData.loaderName] === undefined) {
             try {
               ctx[loaderData.loaderName] = (async () => {
-                return (await this.moduleRef.resolve<NestDataLoader<any, any>>(loaderData.loaderName, ctx[NEST_LOADER_CONTEXT_KEY].contextId, { strict: false }))
+                return (await this.moduleRef.resolve<NestDataLoader<any, any>>(loaderData.loaderName, ctx[contextKey].contextId, { strict: false }))
                   .generateDataLoader(loaderData.data);
               })();
             } catch (e) {

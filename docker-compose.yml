@@ -12,7 +12,7 @@ services:
     ports:
       - ${APP_PORT}:${APP_PORT}
       - 9229:9229
-    command: npm run start:debug
+    command: sh -c 'npm run typeorm:migration:run;npm run seed:prod;npm run start:debug'
     env_file:
       - .env
     networks:

@@ -20,7 +20,7 @@ export class TicketCategoriesResolver extends createBaseResolver('TicketCategori
   @ResolveField(() => [Tag])
   async taggedTickets(
     @Parent() ticketCategory: TicketCategory,
-    @Loader({ loaderName: TagLoader.name, data: { keyColumnName: 'categoryId' } }) tagLoader: DataLoader<TicketCategory['id'], Tag[]>
+    @Loader({ relName: Tag.name, loaderName: TagLoader.name, data: { keyColumnName: 'categoryId' } }) tagLoader: DataLoader<TicketCategory['id'], Tag[]>
   ) {
     return await tagLoader.load(ticketCategory.id);
   }
