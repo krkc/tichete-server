@@ -1,5 +1,6 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { UpdateTagInput } from '../../../domain/tags/dto/update-tag.input';
+import { UpdateAssignmentInput } from '../../assignments/dto/update-assignment.input';
+import { UpdateTagInput } from '../../tags/dto/update-tag.input';
 
 @InputType()
 export class UpdateTicketInput {
@@ -12,4 +13,6 @@ export class UpdateTicketInput {
   statusId?: number;
   @Field(() => [UpdateTagInput])
   tags?: UpdateTagInput[];
+  @Field(() => [UpdateAssignmentInput])
+  assignments?: UpdateAssignmentInput[];
 }
