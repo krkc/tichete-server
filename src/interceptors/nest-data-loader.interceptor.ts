@@ -54,14 +54,14 @@ export const NEST_LOADER_CONTEXT_KEY = "NEST_LOADER_CONTEXT_KEY";
 
 @Injectable()
 export class DataLoaderInterceptor implements NestInterceptor {
-  constructor(private readonly moduleRef: ModuleRef, private t: string) { }
+  constructor(private readonly moduleRef: ModuleRef, private className: string) { }
   /**
    * @inheritdoc
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const graphqlExecutionContext = GqlExecutionContext.create(context);
     const ctx = graphqlExecutionContext.getContext();
-    const contextKey = `${NEST_LOADER_CONTEXT_KEY}_${this.t}`;
+    const contextKey = `${NEST_LOADER_CONTEXT_KEY}_${this.className}`;
 
     if (ctx[contextKey] === undefined) {
       ctx[contextKey] = {

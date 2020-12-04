@@ -9,12 +9,22 @@ import { Assignment } from '../assignments/assignment.entity';
 import { AssignmentLoader } from '../../dataloaders/assignments.loader';
 import * as DataLoader from 'dataloader';
 import { Loader } from '../../decorators/loader.decorator';
+import { Subscription } from '../subscriptions/subscription.entity';
+import { SubscriptionLoader } from '../../dataloaders/subscriptions.loader';
 
 @Injectable()
 @Resolver(() => User)
 export class UsersResolver extends createBaseResolver(`${User.name}s`, User, NewUserInput, UpdateUserInput) {
   constructor(protected readonly service: UsersService) {
     super(service);
+  }
+
+  @ResolveField(() => [Subscription])
+  async subscriptions(
+    @Parent() user: User,
+    @Loader({ relName: Subscription.name, loaderName: SubscriptionLoader.name, data: { keyColumnName: 'userId' } }) subscriptionLoader: DataLoader<User['id'], Subscription[]>
+  ) {
+    return await subscriptionLoader.load(user.id);
   }
 
   @ResolveField(() => [Assignment])
