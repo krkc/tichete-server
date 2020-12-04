@@ -61,9 +61,9 @@ export function createBaseResolver<TResource extends Base, TNewInputType, TUpdat
     @Roles('Administrator')
     @Mutation(() => [Number], { name: `remove${resourceCls.name}` })
     async delete(
-      @Args(`${resourceName}Ids`, { type: () => [Int]}) resourceIds: number[],
+      @Args('ids', { type: () => [Int]}) ids: number[],
     ): Promise<number[]> {
-      const resources = await this.service.delete(resourceIds);
+      const resources = await this.service.delete(ids);
       pubSub.publish(`${resourceCls.name}Removed`, { resourcesRemoved: resources });
 
       return resources;
