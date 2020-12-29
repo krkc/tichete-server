@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Assignment } from './assignment.entity';
 import { AssignmentLoader } from '../../dataloaders/assignments.loader';
 import { APP_INTERCEPTOR } from '@nestjs/core/constants';
-import { DataLoaderInterceptor } from 'src/interceptors/nest-data-loader.interceptor';
+import { DataLoaderInterceptor } from '../../interceptors/nest-data-loader.interceptor';
 import { ModuleRef } from '@nestjs/core';
 
 @Module({

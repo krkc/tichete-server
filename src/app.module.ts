@@ -11,6 +11,7 @@ import { AssignmentsModule } from './domain/assignments/assignments.module';
 import { SubscriptionsModule } from './domain/subscriptions/subscriptions.module';
 import { TagsModule } from './domain/tags/tags.module';
 import { GraphQLModule } from '@nestjs/graphql';
+import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { GraphQLModule } from '@nestjs/graphql';
     TicketsModule,
     AssignmentsModule,
     SubscriptionsModule,
-    TagsModule
+    TagsModule,
+    CaslModule
   ],
   controllers: [AppController],
 })

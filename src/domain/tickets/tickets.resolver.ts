@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import * as DataLoader from 'dataloader';
 import { Loader } from '../../decorators/loader.decorator';
 import { TagLoader } from '../../dataloaders/tags.loader';
@@ -10,13 +10,32 @@ import { UpdateTicketInput } from './dto/update-ticket.input';
 import { Ticket } from './ticket.entity';
 import { TicketsService } from './tickets.service';
 import { Assignment } from '../assignments/assignment.entity';
-import { AssignmentLoader } from 'src/dataloaders/assignments.loader';
+import { AssignmentLoader } from '../../dataloaders/assignments.loader';
+import { PubSub } from 'apollo-server-express';
+import { RequiredActions } from '../../decorators/required-actions.decorator';
+import { Action } from '../../casl/casl-ability.factory';
+
+const pubSub = new PubSub();
 
 @Injectable()
 @Resolver(() => Ticket)
 export class TicketsResolver extends createBaseResolver(`${Ticket.name}s`, Ticket, NewTicketInput, UpdateTicketInput) {
   constructor(protected readonly service: TicketsService) {
     super(service);
+  }
+
+  /**
+   * Non-administrator users can submit tickets, so
+   * override the base implementation which contains
+   * a role check.
+   */
+  @Mutation(() => [Ticket])
+  async create(
+    @Args('newTicketData', { type: () => [NewTicketInput] }) newTicketData: NewTicketInput[],
+  ) {
+    const resources = this.service.create(newTicketData);
+    pubSub.publish(`TicketAdded`, { resourceAdded: resources });
+    return resources;
   }
 
   @ResolveField(() => [Tag])
@@ -27,6 +46,7 @@ export class TicketsResolver extends createBaseResolver(`${Ticket.name}s`, Ticke
     return await tagLoader.load(ticket.id);
   }
 
+  @RequiredActions(Action.Read)
   @ResolveField(() => [Assignment])
   async assignments(
     @Parent() ticket: Ticket,

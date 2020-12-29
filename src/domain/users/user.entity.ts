@@ -33,10 +33,10 @@ export class User extends Base {
   }
 
   @Column({ nullable: true })
-  roleId: number;
+  roleId?: number;
 
   @ManyToOne(() => Role, role => role.users)
-  role: Promise<Role>;
+  role?: Promise<Role>;
 
   @OneToMany(() => Ticket, ticket => ticket.creator)
   submittedTickets?: Promise<Ticket[]>;

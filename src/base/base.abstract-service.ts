@@ -30,7 +30,7 @@ export abstract class BaseService<T extends Base> {
     return this.repo.find({skip: args?.skip, take: args?.take});
   }
 
-  async create(data: DeepPartial<T>[]): Promise<T[]> {
+  async create(data: any[]): Promise<T[]> {
     return this.repo.save(this.repo.create(data) as any as DeepPartial<T>[]);
   }
 

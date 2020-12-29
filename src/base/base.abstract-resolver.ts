@@ -1,7 +1,8 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { PubSub } from 'apollo-server-express';
 import { ClassType } from 'class-transformer/ClassTransformer';
-import { Roles } from '../decorators/roles.decorator';
+import { Action } from '../casl/casl-ability.factory';
+import { RequiredActions } from '../decorators/required-actions.decorator';
 import { Base } from './base.abstract-entity';
 import { BaseService } from './base.abstract-service';
 import { PaginationArgs } from './pagination.args';
@@ -20,7 +21,7 @@ export function createBaseResolver<TResource extends Base, TNewInputType, TUpdat
   const resourcesName = decapitalizeFirstLetter(suffix);
   const pubSub = new PubSub();
 
-  @Resolver(of => resourceCls, { isAbstract: true })
+  @Resolver(() => resourceCls, { isAbstract: true })
   abstract class BaseResolver {
     constructor(
       protected readonly service: BaseService<TResource>
@@ -36,7 +37,7 @@ export function createBaseResolver<TResource extends Base, TNewInputType, TUpdat
       return this.service.findAll(args);
     }
 
-    @Roles('Administrator')
+    @RequiredActions(Action.Create)
     @Mutation(() => [resourceCls], { name: `add${resourceCls.name}` })
     async create(
       @Args(`new${resourceCls.name}Data`, { type: () => [newInputCls]}) inputTypeCls: TNewInputType[],
@@ -47,7 +48,7 @@ export function createBaseResolver<TResource extends Base, TNewInputType, TUpdat
       return resources;
     }
 
-    @Roles('Administrator')
+    @RequiredActions(Action.Update)
     @Mutation(() => [resourceCls], { name: `update${resourceCls.name}` })
     async update(
       @Args(`update${resourceCls.name}Data`, { type: () => [updateInputCls]}) inputTypeCls: TUpdateInputType[],
@@ -58,7 +59,7 @@ export function createBaseResolver<TResource extends Base, TNewInputType, TUpdat
       return resources;
     }
 
-    @Roles('Administrator')
+    @RequiredActions(Action.Delete)
     @Mutation(() => [Number], { name: `remove${resourceCls.name}` })
     async delete(
       @Args('ids', { type: () => [Int]}) ids: number[],

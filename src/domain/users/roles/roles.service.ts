@@ -12,8 +12,4 @@ export class RolesService  extends BaseService<Role> {
   ) {
     super(repo);
   }
-
-  // async create(data: any): Promise<Role> {
-  //   return {} as any;
-  // }
 }

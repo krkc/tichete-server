@@ -3,8 +3,8 @@ import * as argon2 from 'argon2';
 import { RolesService } from '../../domain/users/roles/roles.service';
 import { UsersService } from '../../domain/users/users.service';
 import commandLineArgs from 'command-line-args';
-import { NewRoleInput } from 'src/domain/users/roles/dto/new-role.input';
-import { NewUserInput } from 'src/domain/users/dto/new-user.input';
+import { NewRoleInput } from '../../domain/users/roles/dto/new-role.input';
+import { NewUserInput } from '../../domain/users/dto/new-user.input';
 
 export interface CommandLineArgsOptions extends commandLineArgs.CommandLineOptions {
   truncate: boolean;
@@ -66,7 +66,7 @@ export class Seeder {
     }
 
     const createdRoles = await this.rolesService.create([
-      { name: 'Administrator' } as NewRoleInput,
+      { name: 'Administrator', isSystemAdmin: true } as NewRoleInput,
     ]);
     this.logger.debug('Admin role created.');
 

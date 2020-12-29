@@ -10,6 +10,7 @@ import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthResolver } from './auth.resolver';
 import { RolesModule } from '../domain/users/roles/roles.module';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RolesModule } from '../domain/users/roles/roles.module';
         signOptions: { expiresIn: '60m' }
       }),
     }),
+    CaslModule,
   ],
   providers: [
     AuthService,

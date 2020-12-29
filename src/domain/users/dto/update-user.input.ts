@@ -18,7 +18,7 @@ export class UpdateUserInput {
 
   lastName?: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { defaultValue: null })
   roleId?: number;
 
   @Field(() => [UpdateAssignmentInput])
