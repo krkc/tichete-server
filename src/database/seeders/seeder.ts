@@ -45,8 +45,9 @@ export class Seeder {
       return adminUser;
     }
 
-    await this.usersService.create([
+    await this.usersService.repo.save([
       {
+        id: 1,
         email: 'admin@site.com',
         password: await argon2.hash('password'),
         firstName: 'Site',
@@ -66,7 +67,7 @@ export class Seeder {
     }
 
     const createdRoles = await this.rolesService.create([
-      { name: 'Administrator', isSystemAdmin: true } as NewRoleInput,
+      { id: 1, name: 'Administrator', isSystemAdmin: true } as NewRoleInput,
     ]);
     this.logger.debug('Admin role created.');
 

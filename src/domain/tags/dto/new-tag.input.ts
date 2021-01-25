@@ -3,7 +3,7 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 @InputType()
 export class NewTagInput {
   @Field(() => Int)
-  ticketId!: number;
+  ticketId?: number;
 
   @Field(() => Int)
   categoryId!: number;

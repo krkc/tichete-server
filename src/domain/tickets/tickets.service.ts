@@ -35,18 +35,4 @@ export class TicketsService extends BaseService<Ticket> {
   async findAll(): Promise<Ticket[]> {
     return this.repo.find();
   }
-
-  async create(newTicketInputs: NewTicketInput[]): Promise<Ticket[]> {
-    const newTickets = [];
-    for (const newTicketInput of newTicketInputs) {
-      const categoryIds = newTicketInput.ticketCategoryIds;
-      delete newTicketInput.ticketCategoryIds;
-      const newTicket = await this.repo.save(this.repo.create(newTicketInput));
-      const tags = categoryIds.map(categoryId => new Tag({ ticketId: newTicket.id, categoryId }));
-      newTicket.tags = Promise.resolve(tags);
-      newTickets.push(newTicket);
-    }
-
-    return this.repo.save(newTickets);
-  }
 }
