@@ -30,27 +30,27 @@ export abstract class BaseService<T extends Base> {
     return this.repo.find({skip: args?.skip, take: args?.take});
   }
 
-  async create(data: any[]): Promise<T[]> {
-    return this.repo.save(this.repo.create(data) as any as DeepPartial<T>[]);
+  async create(createResourceInputs: any[]): Promise<T[]> {
+    const resources: T[] = [];
+    for (const resourceInput of createResourceInputs) {
+      let resource = this.setNonRelationshipFields(resourceInput, this.repo.create());
+      resource = await this.repo.save(resource as any as DeepPartial<T>);
+      // Save first, then add relationships, otherwise their source id is undefined.
+      resourceInput.id = resource.id;
+
+      resources.push(await this.resolveM2MRelationships(resource, resourceInput));
+    }
+    return this.repo.save(resources as any as DeepPartial<T>[]);
   }
 
   async update(updateResourceInputs: Partial<T>[]): Promise<T[]> {
     const resources: T[] = [];
-    for (const updateResourceInput of updateResourceInputs) {
-      const resource = await this.repo.findOne(updateResourceInput.id);
-      if (!resource) throw new NotFoundException();
+    for (const resourceInput of updateResourceInputs) {
+      let resource = await this.repo.findOne(resourceInput.id);
+      if (!resource) throw new NotFoundException();      
 
-      // Add/update any fields not specified in this.relationships
-      for (const propertyName in updateResourceInput) {
-        if (!Object.prototype.hasOwnProperty.call(updateResourceInput, propertyName)) continue;
-
-        const property = updateResourceInput[propertyName];
-        if (Object.keys(this.m2mRelationships).find(relationName => relationName === propertyName)) continue;
-
-        resource[propertyName] = property;
-      }
-
-      resources.push(await this.resolveM2MRelationships(resource, updateResourceInput));
+      resource = this.setNonRelationshipFields(resourceInput, resource);
+      resources.push(await this.resolveM2MRelationships(resource, resourceInput));
     }
     return this.repo.save(resources as any as DeepPartial<T>[]);
   }
@@ -65,6 +65,18 @@ export abstract class BaseService<T extends Base> {
     return plainToClass(dto, classToPlain(entity));
   }
 
+  private setNonRelationshipFields(resourceInput: any, resource: T): T {
+    for (const propertyName in resourceInput) {
+      if (!Object.prototype.hasOwnProperty.call(resourceInput, propertyName)) continue;
+
+      const property = resourceInput[propertyName];
+      if (Object.keys(this.m2mRelationships).find(relationName => relationName === propertyName)) continue;
+
+      resource[propertyName] = property;
+    }
+    return resource;
+  }
+
   private async resolveM2MRelationships(resource: T, updateInputData: any) {
     for (const relPropName in this.m2mRelationships) {
       if (!Object.prototype.hasOwnProperty.call(this.m2mRelationships, relPropName)) continue;
@@ -77,7 +89,10 @@ export abstract class BaseService<T extends Base> {
         updateInputData[relPropName].map(relatedResource => relatedResource[relInfo.relIdColName])
       );
       resource[relPropName] = await this.saveRelatedItems(
-        updateInputData[relPropName],
+        updateInputData[relPropName].map(relatedResource => {
+          relatedResource[relInfo.srcIdColName] = updateInputData.id;
+          return relatedResource;
+        }),
         relInfo
       );
     }

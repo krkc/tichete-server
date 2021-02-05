@@ -43,7 +43,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   private async canUserExecuteActions(context, resourceName: string, requiredActions: Action[]): Promise<boolean> {
     const user: User = this.getRequest(context).user; // value returned from JwtStrategy.validate()
     const role: Role = await user.role;
-    if (role.isSystemAdmin) return true;
+    if (role?.isSystemAdmin) return true;
 
     const ability = await this.caslAbilityFactory.createForUser(user);
     return requiredActions.every((requiredAction) => ability.can(requiredAction, resourceName));

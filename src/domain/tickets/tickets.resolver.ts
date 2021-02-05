@@ -24,19 +24,20 @@ export class TicketsResolver extends createBaseResolver(`${Ticket.name}s`, Ticke
     super(service);
   }
 
-  /**
-   * Non-administrator users can submit tickets, so
-   * override the base implementation which contains
-   * a role check.
-   */
-  @Mutation(() => [Ticket])
-  async create(
-    @Args('newTicketData', { type: () => [NewTicketInput] }) newTicketData: NewTicketInput[],
-  ) {
-    const resources = this.service.create(newTicketData);
-    pubSub.publish(`TicketAdded`, { resourceAdded: resources });
-    return resources;
-  }
+  // TODO: Seed an 'Everyone' role that does this.
+  // /**
+  //  * Non-administrator users can submit tickets, so
+  //  * override the base implementation which contains
+  //  * a role check.
+  //  */
+  // @Mutation(() => [Ticket])
+  // async create(
+  //   @Args('newTicketData', { type: () => [NewTicketInput] }) newTicketData: NewTicketInput[],
+  // ) {
+  //   const resources = this.service.create(newTicketData);
+  //   pubSub.publish(`TicketAdded`, { resourceAdded: resources });
+  //   return resources;
+  // }
 
   @ResolveField(() => [Tag])
   async tags(
